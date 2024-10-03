@@ -4,10 +4,12 @@ import './app.css';
 
 import { useState } from 'react';
 
-import { doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, deleteDoc } from 'firebase/firestore';
 // getDoc é pra gente buscar um item
 // getDocs para buscar mais de um item
 // updateDoc é pra atualizar os dados de um documento
+// o deleteDoc é pra exluir um documento de acordo com o id
+// Doc é para especificar um documento
 
 function App() {
 
@@ -137,6 +139,24 @@ function App() {
     // se não atualizar vai cair no erro
   }
 
+  // função para excluir post
+  async function excluirPost(id) {
+    // alert('ID DO POST ' + id)
+    const docRef = doc(db, "posts", id)
+    await deleteDoc(docRef)
+    // na nossa docReference, a gente tem que passar o acesso ao banco de dados,
+    // a coleção que queremos acessar e o documento que queremos deletar
+    // como é uma promise, temos o caso de sucesso e o de erro
+    .then(() => {
+      alert("POST DELETADO COM SUCESSO!")
+    })
+    .catch((error) => {
+      alert("ERRO AO DELETAR POST, erro: ", error)
+    })
+
+    // para excluir eu preciso do id do post
+    // é uma função asíncrona, pois demora um pouco pra se comunicar com o banco de dados
+  }
   
 
 
@@ -184,7 +204,9 @@ function App() {
               <li key={post.id}>
                 <strong>ID: {post.id}</strong><br/>
                 <span>Título: {post.titulo}</span><br/>
-                <span>Autor: {post.autor}</span><br/><br/>
+                <span>Autor: {post.autor}</span><br/>
+                <button onClick={() => excluirPost(post.id)}>Excluir</button><br/><br/>
+                {/* quando o botão for clicado, vamos pegar o id do post */}
               </li>
             )
           })}
