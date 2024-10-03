@@ -141,8 +141,8 @@ function App() {
           {posts.map((post) => {
             return (
               <li key={post.id}>
-                <span>Título: {post.titulo}</span>
-                <span>Autor: {post.autor}</span>
+                <span>Título: {post.titulo}</span><br/>
+                <span>Autor: {post.autor}</span><br/><br/>
               </li>
             )
           })}
