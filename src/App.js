@@ -2,14 +2,25 @@
 import { db } from './firebaseConnection.js';
 import './app.css';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-import { doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, deleteDoc } from 'firebase/firestore';
+import { 
+  doc,
+  setDoc,
+  collection,
+  addDoc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  onSnapshot
+} from 'firebase/firestore';
 // getDoc é pra gente buscar um item
 // getDocs para buscar mais de um item
 // updateDoc é pra atualizar os dados de um documento
 // o deleteDoc é pra exluir um documento de acordo com o id
 // Doc é para especificar um documento
+// o onSnapshot é pra que possamos salvar e atualizar algo no banco em tempo real
 
 function App() {
 
@@ -20,6 +31,32 @@ function App() {
 
   // state para atualizar um post por meio do seu id
   const [idPost, setIdPost] = useState('');
+
+  useEffect(() => {
+    async function loadPosts() {
+      // alert('TESTE')
+      const unsub = onSnapshot(collection(db, "posts"), (snapshot) => {
+        let listaPost = [];
+
+        snapshot.forEach((doc) => {
+          listaPost.push({
+            id: doc.id,
+            titulo: doc.data().titulo,
+            autor: doc.data().autor,
+          })
+        })
+
+        setPosts(listaPost);
+      })
+
+      // a gente esta verificando em tempo real a nossa coleção de posts e atualizando na tela
+      // os resultados, automaticamente
+    }
+
+    loadPosts();
+  }, [])
+  // [] = é array de depenndencias
+  // Este useEffect vai ser carregado quando o componente aparecer na tela
 
 
   async function handleAdd() {
