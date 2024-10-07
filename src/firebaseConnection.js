@@ -3,6 +3,11 @@ import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
 // aqui é pra gente ter a conexão com o banco
 
+// usar osistema de autenticação
+import { getAuth } from 'firebase/auth'
+// com isso a gente pode fazer o login e criar os usuários
+// e trabalhar com autenticação
+
 const firebaseConfig = {
     apiKey: "AIzaSyCdTihb32-TaK3GCKle2JIED8_sTPXUao8",
     authDomain: "curso-a35f6.firebaseapp.com",
@@ -20,6 +25,9 @@ const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 // inicaliza o banco realmente
 
-export { db };
+// fazer a conexão com o banco pra poder usar o auth
+const auth = getAuth(firebaseApp);
+
+export { db, auth };
 // export sempre vai vim dentro de chaves.
 // quando a gente for importar, temos que abrir chaves também

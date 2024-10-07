@@ -1,5 +1,5 @@
 
-import { db } from './firebaseConnection.js';
+import { db, auth } from './firebaseConnection.js';
 import './app.css';
 
 import { useState, useEffect } from 'react';
@@ -22,6 +22,13 @@ import {
 // Doc é para especificar um documento
 // o onSnapshot é pra que possamos salvar e atualizar algo no banco em tempo real
 
+
+// importar os metodos para criar novos usuários
+import {
+  createUserWithEmailAndPassword
+} from 'firebase/auth';
+// método para criar um usuário com email e senha
+
 function App() {
 
   const [titulo, setTitulo] = useState('');
@@ -31,6 +38,9 @@ function App() {
 
   // state para atualizar um post por meio do seu id
   const [idPost, setIdPost] = useState('');
+
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
 
   useEffect(() => {
     async function loadPosts() {
@@ -194,6 +204,38 @@ function App() {
     // para excluir eu preciso do id do post
     // é uma função asíncrona, pois demora um pouco pra se comunicar com o banco de dados
   }
+
+
+  async function novoUsuario() {
+    // alert('Teste');
+
+    await createUserWithEmailAndPassword(auth, email, senha)
+    .then((value) => {
+      console.log('CADASTRADO COM SUCESSO!')
+      // mostra o que recebemos
+      console.log('valores recebidos: ',value)
+
+      // acessar o uid do user
+      console.log("uid do user:", value.user.id);
+      setEmail('');
+      setSenha('');
+    })
+    .catch((error) => {
+      console.log('ERRO AO CADASTRAR NOVO USUÁRIO!')
+      // algumas tratativas com o email
+      if (error.code === 'auth/weak-password') {
+        alert('Senha muito fraca.')
+      } else if (error.code === 'auth/email-already-in-use') {
+        alert('Email já existe!')
+      }
+    })
+
+
+
+    // primeiro tem que passar qual a conexão com o auth
+    // depois o email
+    // e o password
+  }
   
 
 
@@ -202,6 +244,30 @@ function App() {
       <h1>ReactJS + firebase :)</h1>
 
       <div className='container'>
+        <h2>Usuários:</h2>
+        <label>Email:</label>
+        <input
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder='Digite um email'
+        /> <br/>
+
+      <label>Senha:</label>
+      <input
+      value={senha}
+      onChange={(e) => setSenha(e.target.value)}
+      placeholder='Informe sua senha'
+      />
+      <br/>
+
+      <button onClick={novoUsuario}>Cadastrar</button>
+      </div>
+
+      <br/><br/>
+      <hr/>
+
+      <div className='container'>
+        <h2>POSTS</h2>
 
         <label>ID do Post</label>
         <input
