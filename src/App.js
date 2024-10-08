@@ -25,9 +25,17 @@ import {
 
 // importar os metodos para criar novos usuários
 import {
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
 } from 'firebase/auth';
 // método para criar um usuário com email e senha
+// o metodo signOut é para deslogar o usuário
+
+// o onAuthStateChanged é para que o login do usuário permaneça
+// é método que fica verificando se tem usuário ou não
+// ele se baseia no localStorage
 
 function App() {
 
@@ -41,6 +49,10 @@ function App() {
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+
+  // states para controlar os usuários logados ou não
+  const [user, setUser] = useState(false);
+  const [userDetail, setUserDetail] = useState({});
 
   useEffect(() => {
     async function loadPosts() {
@@ -68,6 +80,37 @@ function App() {
   // [] = é array de depenndencias
   // Este useEffect vai ser carregado quando o componente aparecer na tela
 
+
+  useEffect(() => {
+    async function checkLogin() {
+      onAuthStateChanged(auth, (user) => {
+        if(user) {
+          // se tem usuário logado ele entra aqui...
+          console.log('user: ',user);
+          // esse user devolve todas as informações do usuário
+
+          setUser(true);
+          setUserDetail({
+            uid: user.uid,
+            email: user.email
+          })
+          // ele monta na tela todos os detalhes dos usuários logado
+          // ele permanece o usuário logado quando a gente abre a aplicação
+        } else {
+          // não possui nenhum user logado.
+          setUser(false);
+          setUserDetail({});
+        }
+
+      })
+
+      // depois da conexão, a gente tem um observer
+      // ele vai ficar observando se tem usuário ou não
+      // ele vai ser uma função anonima que vai receber uma propriedade
+      // chamada user
+    }
+    checkLogin();
+  }, [])
 
   async function handleAdd() {
     // await setDoc(doc(db, "posts", "12345"), {
@@ -236,12 +279,65 @@ function App() {
     // depois o email
     // e o password
   }
+
+
+  // função para logar o usuário
+  async function logarUsuario() {
+    // alert('TESTE');
+
+    await signInWithEmailAndPassword(auth, email, senha)
+    .then((value) => {
+      console.log('USER LOGADO COM SUCESSO')
+
+      // detalhes do usuário
+      console.log('value.user: ', value.user);
+
+      setUserDetail({
+        uid: value.user.uid,
+        email: value.user.email,
+      })
+
+      // indica que o usuário está logado
+      setUser(true);
+
+      setEmail('');
+      setSenha('');
+    })
+    .catch(() => {
+      console.log('ERRO AO FAZER O LOGIN')
+    })
+
+    // auth é a conexão com o nosso sistema de autenticação
+    // value é os detalhes do usuário que foi logado
+  }
+
+  async function fazerLogout() {
+    // alert('TESTE');
+    await signOut(auth)
+    setUser(false);
+    setUserDetail({});
+
+    // só precisamos ter a nossa conexão com o auth
+  }
   
 
 
   return (
     <div>
       <h1>ReactJS + firebase :)</h1>
+
+      {/* Essa div vai aparecer somente se o usuário estiver logado: */}
+
+      {
+        user && (
+          <div>
+            <strong>Seja bem-vindo(a), Você está logado!</strong><br/>
+            <span>ID: {userDetail.uid} - Email: {userDetail.email}</span><br/>
+            <button onClick={fazerLogout}>Sair da conta</button>
+            <br/><br/>
+          </div>
+        )
+      }
 
       <div className='container'>
         <h2>Usuários:</h2>
@@ -261,6 +357,7 @@ function App() {
       <br/>
 
       <button onClick={novoUsuario}>Cadastrar</button>
+      <button onClick={logarUsuario}>Fazer login</button>
       </div>
 
       <br/><br/>
